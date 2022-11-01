@@ -70,4 +70,4 @@ const substitutionModule = (function () {
   };
 })();
 
-module.exports = { substitution: substitutionModule.substitution };
+module.exports = substitutionModule.substitution;
