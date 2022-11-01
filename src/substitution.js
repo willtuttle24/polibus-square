@@ -1,67 +1,36 @@
 // Please refrain from tampering with the setup code provided here,
 // as the index.html and test files rely on this setup to work properly.
-// Only add code (helper methods, variables, etc.) within the scope
+// Only add code (e.g., helper methods, variables, etc.) within the scope
 // of the anonymous function on line 6
 
 const substitutionModule = (function () {
-  // you can add any code you want within this function scope
-  const trueAlphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
-
-  //test if any value in the newAlphabetArray repeats
-  function hasDuplicateValues(newAlphabetArray) {
-    return newAlphabetArray.some((character) => {
-      return newAlphabetArray.filter((index) => character === index).length > 1;
-    });
-  }
-
-  function getArrayFromString(string) {
-    return Array.from(string);
-  }
-
-  //encode message by finding which letter in the trueAlphabet matches the inputArray character and using the index of the trueAlphabet character when returning a character from the substitute alphabet
-  function encodeMessage(inputArray, newAlphabetArray) {
-    return inputArray.map((character) => {
-      if (character === " ") {
-        return character;
-      } else {
-        let desiredLetter = trueAlphabet.find((letter) => letter === character);
-        return newAlphabetArray[trueAlphabet.indexOf(desiredLetter)];
-      }
-    }).join("")
-  }
-
-  //decode message by finding which character in the substitute alphabet matches the inputArray character and using the index of the substitute character when returning a letter from the trueAlphabet
-  function decodeMessage(inputArray, newAlphabetArray) {
-    return inputArray.map((character) => {
-      if (character === " ") {
-        return character;
-      } else {
-        let desiredCharacter = newAlphabetArray.find((indexCharacter) => indexCharacter === character);
-        return trueAlphabet[newAlphabetArray.indexOf(desiredCharacter)];
-      }
-    }).join("")
-  }
 
   function substitution(input, alphabet, encode = true) {
-    // test to make sure alphabet length is 26 or missing
-    if (!alphabet || alphabet.length !== 26) {
-      return false;
-    }
-    if (!input) {
-      return false;
+    const encryptionKeys = {};
+
+    if(!alphabet || alphabet.length < 26 || alphabet.length > 26) return false;
+    // character codes a-z
+    let charCodeCount = 97;
+
+    for(let c = 0; c <= 25; c++){ //fill our object with normal alphabet keys paired with substitution keys
+      if(Object.values(encryptionKeys).includes(alphabet[c])){ return false; } //if a value in encryptionKeys already exists (is alphabet[c])
+      else{
+        encryptionKeys[String.fromCharCode(charCodeCount)] = alphabet[c]; //set each key to a normal alphabet letter, value to a new alphabet char
+        charCodeCount++;
+      }
     }
 
-    const inputArray = getArrayFromString(input.toLowerCase());
-    const newAlphabetArray = getArrayFromString(alphabet.toLowerCase());
+    const buildEncryption = input.toLowerCase().split('');
 
-    if (hasDuplicateValues(newAlphabetArray)) {
-      return false;
-    }
-    if (encode) {
-      return encodeMessage(inputArray, newAlphabetArray);
-    }
-    if (!encode) {
-      return decodeMessage(inputArray, newAlphabetArray);
+    { //encode or decode here
+		  return buildEncryption.map(letter => {  //iterate through each letter in our input
+		  	for(let plainLetter in encryptionKeys){  //iterate through each object in encryptionKeys
+		  		let substitutionLetter = encryptionKeys[plainLetter]; //set our keyvalue to substitutionLetter
+          if(letter == " ") return " "; //keep spaces
+		  		if(encode && letter == plainLetter) return substitutionLetter; //encode - if our input letter = key's string of plain letter, return the value of subsitutionLetter
+          if(!encode && letter == substitutionLetter) return plainLetter; //decode - if our input letter equals a substitution letter, return the plain letter
+      }
+		}).join('');
     }
   }
 
@@ -70,4 +39,4 @@ const substitutionModule = (function () {
   };
 })();
 
-module.exports = substitutionModule.substitution;
+module.exports = { substitution: substitutionModule.substitution };
